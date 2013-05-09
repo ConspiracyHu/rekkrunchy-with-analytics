@@ -1,0 +1,10 @@
+*.ncb
+*.suo
+*.vcproj.*
+*.vcxproj.*
+*.sdf
+*.opensdf
+*/ipch/*
+Debug
+Release
+*.vcxproj.user
