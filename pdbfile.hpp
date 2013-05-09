@@ -8,7 +8,7 @@
 
 /****************************************************************************/
 
-class IDiaSession;
+struct IDiaSession;
 
 class PDBFileReader : public DebugInfoReader
 {
@@ -21,7 +21,7 @@ class PDBFileReader : public DebugInfoReader
   sU32 DanglingLengthStart;
 
   sU32 CompilandFromSectionOffset(sU32 section,sU32 offset,sBool &codeFlag);
-  void ProcessSymbol(class IDiaSymbol *symbol,DebugInfo &to);
+  void ProcessSymbol(struct IDiaSymbol *symbol,DebugInfo &to);
   void ReadEverything(DebugInfo &to);
 
 public:
