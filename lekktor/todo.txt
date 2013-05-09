@@ -1,6 +1,0 @@
-x pragmas
-x case
-x functions
-- else trick
-- && ||
-- ?:

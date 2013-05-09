@@ -1,9 +1,0 @@
-Debug/
-Release/
-Player\ Debug/
-Player\ Release/
-ipch/
-*.suo
-*.sln.old
-*.sdf
-*.opensdf
