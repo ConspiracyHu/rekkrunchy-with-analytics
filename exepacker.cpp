@@ -884,6 +884,13 @@ sU8 *EXEPacker::Pack(sU8 *source,sInt &outSize,DebugInfo *info,PackerCallback cb
   while(skip<dataSize && !UnImage[dataSize-skip-1])
     skip++;
 
+  // set symbol source offsets and reset symbol packed size
+  for (sS32 i=0; i<info->Symbols.Count; i++)
+  {
+    info->Symbols[i].sourceOffset = SourceOffset(info->Symbols[i].VA-PH->ImageStart);
+    info->Symbols[i].PackedSize = 0.0;
+  }
+
   // compress the image (right to its destination)
   dataStart = OutSize;
   OutSize += RangecoderPack(UnImage,dataSize-skip,OutImage+dataStart,cb);
