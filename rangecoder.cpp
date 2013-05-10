@@ -3,6 +3,7 @@
 
 #include "_types.hpp"
 #include "rangecoder.hpp"
+#include "debuginfo.hpp"
 
 // ---- helpers
 
@@ -71,7 +72,7 @@ static void codeBit(sU32 prob,sInt bit)
   }
 }
 
-sU32 RangecoderPack(const sU8 *in,sU32 inSize,sU8 *out,PackerCallback cb)
+sU32 RangecoderPack(const sU8 *in,sU32 inSize,sU8 *out,PackerCallback cb,DebugInfo* info)
 {
   sU32 prob = 2048;
   sU32 zeroProb = 1;
