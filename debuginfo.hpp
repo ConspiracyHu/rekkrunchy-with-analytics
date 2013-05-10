@@ -43,7 +43,7 @@ struct DISymbol
   sU32 Size;
   sInt Class;
   sF64 PackedSize;
-  sU32 sourceOffset;
+  sU32 sourcePos;
 };
 
 class DebugInfo

@@ -885,9 +885,11 @@ sU8 *EXEPacker::Pack(sU8 *source,sInt &outSize,DebugInfo *info,PackerCallback cb
     skip++;
 
   // set symbol source offsets and reset symbol packed size
+  sU32 base = SourceOffset(info->Symbols[0].VA-PH->ImageStart);
+
   for (sS32 i=0; i<info->Symbols.Count; i++)
   {
-    info->Symbols[i].sourceOffset = SourceOffset(info->Symbols[i].VA-PH->ImageStart);
+    info->Symbols[i].sourcePos = SourceOffset(info->Symbols[i].VA-PH->ImageStart) - base; // compute offset relative to first symbol
     info->Symbols[i].PackedSize = 0.0;
   }
 
