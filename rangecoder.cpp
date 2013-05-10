@@ -4,6 +4,7 @@
 #include "_types.hpp"
 #include "rangecoder.hpp"
 #include "debuginfo.hpp"
+#include <cmath>
 
 // ---- helpers
 
@@ -30,6 +31,7 @@ static sInt ffNum,cache;
 static sU64 low;
 static sU32 range;
 static sBool firstByte;
+static sU32 byteCount;
 
 static void shiftLow()
 {
@@ -50,6 +52,7 @@ static void shiftLow()
     ffNum++;
 
   low = (low << 8) & 0xffffffff;
+  byteCount++;
 }
 
 static void codeBit(sU32 prob,sInt bit)
@@ -85,6 +88,8 @@ sU32 RangecoderPack(const sU8 *in,sU32 inSize,sU8 *out,PackerCallback cb,DebugIn
   firstByte = true;
   modelInitASM();
   bufPtr = startBufPtr = (sU8 *) in;
+  sF64 lastSize = 0.0;
+  sInt curSymbol = 0;
 
   for(sInt pos=0;pos<inSize;pos++)
   {
@@ -136,9 +141,28 @@ sU32 RangecoderPack(const sU8 *in,sU32 inSize,sU8 *out,PackerCallback cb,DebugIn
 
       prob = modelASM(bit);
     }
+
+    // update sizes
+    double fracSize = -log(sF64(range)/sF64(0xFFFFFFFF))/log(2.0)/8.0;
+    double curSize = byteCount + fracSize;
+    double byteSize = curSize - lastSize;
+
+    if (pos < (info->Symbols[curSymbol].sourcePos+info->Symbols[curSymbol].Size)) // we don't count padding for symbols
+      info->Symbols[curSymbol].PackedSize += byteSize;
+
+    info->Files[info->Symbols[curSymbol].FileNum].PackedSize += byteSize;
+    info->Files[info->Symbols[curSymbol].FileNum].Size += 1;
+    info->NameSps[info->Symbols[curSymbol].NameSpNum].PackedSize += byteSize;
+    info->NameSps[info->Symbols[curSymbol].NameSpNum].Size += 1;
+
+    lastSize = curSize;
+
+    // move to next symbol if applicable
+    if (curSymbol < info->Symbols.Count-1 && pos>=info->Symbols[curSymbol+1].sourcePos)
+      curSymbol++;
   }
 
-  for(sInt i=0;i<5;i++)
+  for(sInt i=0;i<5;i++) // these bytes are not counted correctly
     shiftLow();
 
   __asm emms;
