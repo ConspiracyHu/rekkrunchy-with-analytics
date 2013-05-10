@@ -66,7 +66,7 @@ sInt sAppMain(sInt argc,sChar **argv)
   EXEPacker pack;
   DebugInfo info;
 
-  sSystem->PrintF(sAPPNAME " " sVERSION " >> radical exe packer (c) f. giesen 2003-2007\n\n");
+  sSystem->PrintF(sAPPNAME " " sVERSION " >> radical exe packer (c) f. giesen and contributors 2003-2013\n\n");
 
   // parser command line
   fileName = 0;
