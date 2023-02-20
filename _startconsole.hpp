@@ -17,34 +17,38 @@
 /****************************************************************************/
 
 // implement this to write a program
-
-sInt sAppMain(sInt argc,sChar **argv);
-
-/****************************************************************************/
-
-struct sSystem_
+namespace rekkrunchy
 {
-// init/exit/debug
 
-  void Log(sChar *);                                      // print out debug string
-  sNORETURN void Abort(sChar *msg);                       // terminate now
-  void Tag();                                             // called by broker (in a direct hackish fashion)
 
-// console io
+  sInt sAppMain( sInt argc, sChar **argv );
 
-  void PrintF(sChar *format,...);
+  /****************************************************************************/
 
-// file
+  struct sSystem_
+  {
+    // init/exit/debug
 
-  sU8 *LoadFile(sChar *name,sInt &size);                  // load file entirely, return size
-  sU8 *LoadFile(sChar *name);                             // load file entirely
-  sChar *LoadText(sChar *name);                           // load file entirely and add trailing zero
-  sBool SaveFile(sChar *name,sU8 *data,sInt size);        // save file entirely
+    void Log( sChar * );                                      // print out debug string
+    sNORETURN void Abort( sChar *msg );                       // terminate now
+    void Tag();                                             // called by broker (in a direct hackish fashion)
 
-// misc
-  sInt GetTime();
-};
+  // console io
 
-extern sSystem_ *sSystem;
+    void PrintF( sChar *format, ... );
+
+    // file
+
+    sU8 *LoadFile( sChar *name, sInt &size );                  // load file entirely, return size
+    sU8 *LoadFile( sChar *name );                             // load file entirely
+    sChar *LoadText( sChar *name );                           // load file entirely and add trailing zero
+    sBool SaveFile( sChar *name, sU8 *data, sInt size );        // save file entirely
+
+  // misc
+    sInt GetTime();
+  };
+
+  extern sSystem_ *sSystem;
+}
 
 #endif

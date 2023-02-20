@@ -6,22 +6,26 @@
 
 #include "debuginfo.hpp"
 
-/****************************************************************************/
-
-class MAPFileReader : public DebugInfoReader
+namespace rekkrunchy
 {
-  struct Section;
-  sArray<Section> Sections;
 
-  sInt ScanString(sChar *&string,DebugInfo &to);
-  static sBool IsHexString(const sChar *str,sInt count);
+  /****************************************************************************/
 
-  Section *GetSection(sInt num,sU32 offs);
+  class MAPFileReader : public DebugInfoReader
+  {
+    struct Section;
+    sArray<Section> Sections;
 
-public:
-  sBool ReadDebugInfo(sChar *fileName,DebugInfo &to);
-};
+    sInt ScanString( sChar *&string, DebugInfo &to );
+    static sBool IsHexString( const sChar *str, sInt count );
 
-/****************************************************************************/
+    Section *GetSection( sInt num, sU32 offs );
 
+  public:
+    sBool ReadDebugInfo( sChar *fileName, DebugInfo &to );
+  };
+
+  /****************************************************************************/
+
+}
 #endif

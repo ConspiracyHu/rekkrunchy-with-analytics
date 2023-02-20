@@ -8,3 +8,4 @@
 Debug
 Release
 *.vcxproj.user
+*.vs/*

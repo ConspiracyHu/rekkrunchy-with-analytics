@@ -99,6 +99,7 @@ DisUnfilter:
         call          [ebx]
         test          eax, eax
         jz            .imperr
+		;jmp            .imperr
         xchg          eax, ebp
   
 .impfunc:
@@ -111,6 +112,8 @@ DisUnfilter:
         push          esi
   
 .impget:
+		test		  ebp, ebp
+		jz			  .impfunc
         push          ebp
         call          [ebx+4]
         stosd
@@ -118,6 +121,26 @@ DisUnfilter:
         jnz           .impfunc
   
 .imperr:
+		mov edi, 'EDLL'
+		
+.strcpy:
+		lodsb
+		test al,al
+		stosb
+		jnz short .strcpy
+
+		push dword 'KERN'
+		call [ebx]
+		push dword 'MSGB'
+		push eax
+		call [ebx+4]
+		xor ebx, ebx
+		push ebx
+		push ebx
+		push 'ERRR'
+		push ebx
+		call eax
+
         inc           eax
         pop           ebx
         pop           ebx
@@ -150,7 +173,7 @@ DisUnfilter:
         xchg          esi, [ebp+BUFFER+15*4]
         
 .jtclr  or            dword [ebp+dataArea.jumpTable], byte -1
-        jmp           short .main
+        jmp           .main
         
 .gotins xor           eax, eax
         cmp           [ebp+dataArea.nextFunc], eax
@@ -379,3 +402,10 @@ Tables:
   times (256-($-Tables)) db 0
   ; the third table is implemented as code
         
+kernel32 db "user32.dll"
+pad db 0
+messagebox db "MessageBoxA"
+pad2 db 0
+errorMsg db "Failed to load "
+errorDLLName:
+times 32 db 0

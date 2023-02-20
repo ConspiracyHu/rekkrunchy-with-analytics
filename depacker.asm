@@ -83,142 +83,14 @@ extern        PATCHOFFS
 extern        PATCHVALUE
 
 global        STAGE0ENTRY
+global        DEXORENTRY
+
+extern        PACKEDSIZE
 
 ; ---- code
 
 section       .text
 
-; squash
-;   in: eax
-;   out: eax
-;   destroy: ecx,edx
-
-squash:
-  cmp       eax, -2047
-  jge       .notsmall
-  xor       eax, eax
-  ret
-  
-.notsmall:
-  cmp       eax, 2047
-  jle       .notbig
-  mov       eax, 4095
-  ret
-  
-.notbig:
-  mov       ecx, eax
-  sar       ecx, 7
-  lea       ecx, [squashTab+ecx*2+16*2]
-  and       eax, byte 127
-  mov       edx, [ecx+2]
-  sub       edx, [ecx]
-  movzx     edx, dx
-  imul      eax, edx
-  add       eax, byte 64
-  sar       eax, 7
-  add       ax, [ecx]
-  ret
-  
-; contextHash
-;   in: esi=model
-;       eax=i
-;   out: eax=p
-;   destroy: edx
-
-contextHash:
-  mov       edx, eax
-  shr       edx, 24
-  and       eax, ((MEM / 4) - 1) & ~1
-  lea       eax, [ebp+Work.modelMem+eax*4]
-  
-  cmp       dl, [eax]
-  jne       .notequal1
-  inc       eax
-  ret
-  
-.notequal1:
-  add       eax, byte 4
-  cmp       dl, [eax]
-  jne       .notequal2
-  inc       eax
-  ret
-  
-.notequal2:    
-  mov       dh, [eax+1]
-  cmp       dh, [eax-3]
-  jbe       .noswap
-  sub       eax, byte 4
-  
-.noswap:
-  movzx     edx, dl
-  mov       [eax], edx
-  inc       eax
-  ret
-  
-; train
-;   in: eax=err
-;       esi=t
-;       edi=w
-;       ecx=n/4
-;   out: esi,edi advanced.
-train:
-  movd      mm0, eax
-  punpcklwd mm0, mm0
-  punpcklwd mm0, mm0
-  pcmpeqb   mm1, mm1
-  psrlw     mm1, 15
-
-.lp:
-  movq      mm3, [esi]
-  movq      mm2, [edi]
-  paddsw    mm3, mm3
-  pmulhw    mm3, mm0
-  paddsw    mm3, mm1
-  psraw     mm3, 1
-  paddsw    mm2, mm3
-  movq      [edi], mm2
-  add       esi, byte 8
-  add       edi, byte 8
-  loop      .lp  
-  
-  ret
-
-; decodebit
-;   in: eax=prob
-;   out: edx=bit; eax, ecx destroyed
-
-decodebit:
-  mov       ecx, [ebp+Work.src]
-  mul       dword [ebp+Work.range]
-  shrd      eax, edx, 12
-  
-  mov       ecx, [ecx]
-  bswap     ecx
-  sub       ecx, [ebp+Work.csub]
-  xor       edx, edx
-  cmp       eax, ecx
-  ja        .one
-  
-  add       [ebp+Work.csub], eax
-  sub       [ebp+Work.range], eax
-  jmp       short .renorm
-
-.one:
-  mov       [ebp+Work.range], eax
-  inc       edx
-
-.renorm:
-  cmp       byte [ebp+Work.range+3], 0
-  jne       .done
-  
-  ; renormalize
-  inc       dword [ebp+Work.src]
-  shl       dword [ebp+Work.range], 8
-  shl       dword [ebp+Work.csub], 8
-  jmp       short .renorm
-  
-.done:
-  ret
 
 ; ---- the actual depacker entry
 
@@ -611,13 +483,18 @@ STAGE0ENTRY:
   dec       edi
   shr       bl, 1
   jnc       .hashnotset
-  
+  cmp       edi, dword [ebp+Work.origdst]
+  jae       .nounderflow
+.underflow:
+  xor       dl,dl
+  jmp       .nounderflowskip
+.nounderflow:
   mov       dl, [edi]
+.nounderflowskip:
   and       dl, dh
   xor       al, dl
   imul      eax, 0x01000193
   jmp       short .hashnext
-
 .hashnotset:
   jnz       .hashnext
   add       esi, ContextModel.size
@@ -941,11 +818,150 @@ STAGE0ENTRY:
 
 ; ---- initialized data
 
+DEXORENTRY:
+jmp STAGE0ENTRY
+
 section       .data
+
+; train
+;   in: eax=err
+;       esi=t
+;       edi=w
+;       ecx=n/4
+;   out: esi,edi advanced.
+train:
+  movd      mm0, eax
+  punpcklwd mm0, mm0
+  punpcklwd mm0, mm0
+  pcmpeqb   mm1, mm1
+  psrlw     mm1, 15
+
+.lp:
+  movq      mm3, [esi]
+  movq      mm2, [edi]
+  paddsw    mm3, mm3
+  pmulhw    mm3, mm0
+  paddsw    mm3, mm1
+  psraw     mm3, 1
+  paddsw    mm2, mm3
+  movq      [edi], mm2
+  add       esi, byte 8
+  add       edi, byte 8
+  loop      .lp  
+  
+  ret
+
+bitm          db 0xff, 0xff, 0xff, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+
+; contextHash
+;   in: esi=model
+;       eax=i
+;   out: eax=p
+;   destroy: edx
+
+contextHash:
+  mov       edx, eax
+  shr       edx, 24
+  and       eax, ((MEM / 4) - 1) & ~1
+  lea       eax, [ebp+Work.modelMem+eax*4]
+  
+  cmp       dl, [eax]
+  jne       .notequal1
+  inc       eax
+  ret
+  
+.notequal1:
+  add       eax, byte 4
+  cmp       dl, [eax]
+  jne       .notequal2
+  inc       eax
+  ret
+  
+.notequal2:    
+  mov       dh, [eax+1]
+  cmp       dh, [eax-3]
+  jbe       .noswap
+  sub       eax, byte 4
+  
+.noswap:
+  movzx     edx, dl
+  mov       [eax], edx
+  inc       eax
+  ret
 
 squashTab     dw    1,   2,   4,   6,  10,  17,  27,  45,  74, 120, 194
               dw  311, 488, 747,1102,1546,2048,2550,2994,3349,3608,3785
               dw 3902,3976,4022,4051,4069,4079,4086,4090,4092,4094,4095
-masks         db 0x1f, 0x27, 0x88, 0x07, 0x0a, 0x09, 0x05, 0x03, 0x04, 0x02, 0x01
-bitm          db 0xff, 0xff, 0xff, 0xe0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 
+; squash
+;   in: eax
+;   out: eax
+;   destroy: ecx,edx
+
+squash:
+  cmp       eax, -2047
+  jge       .notsmall
+  xor       eax, eax
+  ret
+  
+.notsmall:
+  cmp       eax, 2047
+  jle       .notbig
+  mov       eax, 4095
+  ret
+  
+.notbig:
+  mov       ecx, eax
+  sar       ecx, 7
+  lea       ecx, [squashTab+ecx*2+16*2]
+  and       eax, byte 127
+  mov       edx, [ecx+2]
+  sub       edx, [ecx]
+  movzx     edx, dx
+  imul      eax, edx
+  add       eax, byte 64
+  sar       eax, 7
+  add       ax, [ecx]
+  ret
+  
+
+masks         db 0x1f, 0x27, 0x88, 0x07, 0x0a, 0x09, 0x05, 0x03, 0x04, 0x02, 0x01
+
+
+; decodebit
+;   in: eax=prob
+;   out: edx=bit; eax, ecx destroyed
+
+decodebit:
+  mov       ecx, [ebp+Work.src]
+  mul       dword [ebp+Work.range]
+  shrd      eax, edx, 12
+  
+  mov       ecx, [ecx]
+  bswap     ecx
+  sub       ecx, [ebp+Work.csub]
+  xor       edx, edx
+  cmp       eax, ecx
+  ja        .one
+  
+  add       [ebp+Work.csub], eax
+  sub       [ebp+Work.range], eax
+  jmp       short .renorm
+
+.one:
+  mov       [ebp+Work.range], eax
+  inc       edx
+
+.renorm:
+  cmp       byte [ebp+Work.range+3], 0
+  jne       .done
+  
+  ; renormalize
+  inc       dword [ebp+Work.src]
+  shl       dword [ebp+Work.range], 8
+  shl       dword [ebp+Work.csub], 8
+  jmp       short .renorm
+  
+.done:
+  ret
+ 
