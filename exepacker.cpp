@@ -656,8 +656,6 @@ namespace rekkrunchy
 
   /****************************************************************************/
 
-  FILE* f = fopen( "debug.log","w+t" );
-
   sU8 *EXEPacker::Pack( sU8 *source, sInt srcSize, sInt &outSize, DebugInfo *info, PackerCallback cb, KKBlobList *blobs )
   {
     PESection *outSection;
@@ -988,7 +986,6 @@ namespace rekkrunchy
           {
             info->Symbols[ i ].sourcePos = SourceOffset2( info->Symbols[ i ].VA - PH->ImageStart * 2 ) /*- base*/; // compute offset relative to first symbol
             info->Symbols[ i ].PackedSize = 0.0;
-            fprintf( f, "%d %s: %x\n", i, *(char**)&( info->Symbols[ i ].Name ), info->Symbols[ i ].sourcePos );
           }
           else
           {
@@ -996,7 +993,6 @@ namespace rekkrunchy
             {
               info->Symbols[ i ].sourcePos = SourceOffset2( info->Symbols[ i - 1 ].VA - PH->ImageStart * 2 ) /*- base*/ + info->Symbols[ i - 1 ].Size; // compute offset relative to first symbol
               info->Symbols[ i ].PackedSize = 0.0;
-              fprintf( f, "%d %s: %x\n", i, *(char**)&( info->Symbols[ i ].Name ), info->Symbols[ i ].sourcePos );
             }
           }
         }

@@ -11,6 +11,7 @@ So far everything works the same, except that pdb loading and size reports work 
 
 Feel free to get in touch at ralph@deadfeed.net
 
+*WARNING:* You need NASM version 2.10.07 for this to compile.
 
 -------------------------------------------------------------------------------------------------------------
 
