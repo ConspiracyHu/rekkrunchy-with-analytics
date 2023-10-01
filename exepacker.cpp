@@ -1003,6 +1003,25 @@ namespace rekkrunchy
       }
     }
 
+    qsort(info->Symbols.Array, info->Symbols.Count, sizeof(DISymbol), [](const void* a, const void* b) { return (int)(((DISymbol*)a)->sourcePos - ((DISymbol*)b)->sourcePos); });
+
+    for (int i = 0; i < info->Symbols.Count; i++)
+    {
+      DISymbol* sym = &info->Symbols[i];
+
+      if (sym->Class != DIC_END && i < info->Symbols.Count - 1)
+      {
+        sVERIFY(i != info->Symbols.Count - 1);
+        if (!sym->Size)
+          sym->Size = sym[1].sourcePos - sym->sourcePos;
+      }
+
+      char text[2048]{};
+      sprintf_s(text, "%s: %x - %d\n", *(char**)&(info->Symbols[i].Name), sym->sourcePos, sym->Size);
+      OutputDebugStringA(text);
+
+    }
+
     unsigned int DEXORSIZE = 0x0;
 
     // compress the image (right to its destination)

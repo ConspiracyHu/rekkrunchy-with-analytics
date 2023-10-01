@@ -611,6 +611,9 @@ namespace rekkrunchy
     if ( !strcmp( info->Name, "demo" ) )
       int x = 0;
 
+    if (!strcmp(info->Name, "music"))
+      int x = 0;
+
     if ( !strcmp( info->Name, "affectors" ) )
       int x = 0;
 
@@ -619,8 +622,25 @@ namespace rekkrunchy
       ULONG64 typeLength;
       if ( SymGetTypeInfo( GetCurrentProcess(), info->ModBase, info->TypeIndex, TI_GET_LENGTH, &typeLength ) )
         sym->Size = typeLength;
-
     }
+
+    if (sym->Size == 0 && strstr(info->Name, "_real") == info->Name)
+      sym->Size = 4; // float value
+
+    if (sym->Size == 0 && strstr(info->Name, "_imp__") == info->Name)
+      sym->Size = 4; // import
+
+    if (sym->Size == 0 && strstr(info->Name, "_xmm") == info->Name)
+      sym->Size = 16; // xmm
+
+    if (sym->Size == 0 && strstr(info->Name, "_IMPORT_DESCRIPTOR_") == info->Name)
+      sym->Size = sizeof(_IMAGE_IMPORT_DESCRIPTOR);
+
+    if (sym->Size == 0 && strstr(info->Name, "_NULL_THUNK_DATA"))
+      sym->Size = 4; // ??
+
+    if (sym->Size == 0 && strstr(info->Name, "_GUID_") == info->Name)
+      sym->Size = sizeof(GUID); // guid
 
     sym->FileNum = -1;
 
@@ -675,14 +695,21 @@ namespace rekkrunchy
 
       int symStart = 0;
 
+/*
       for ( int i = symStart + 1; i < Symbols.Count; i++ )
         for ( int j = i; j > symStart; j-- )
           if ( Symbols[ j ].VA < Symbols[ j - 1 ].VA )
             sSwap( Symbols[ j ], Symbols[ j - 1 ] );
+*/
 
+/*
       for ( int i = symStart; i < Symbols.Count; i++ )
       {
         DISymbol* sym = &Symbols[ i ];
+
+        char text[2048]{};
+        sprintf_s(text, "%s: %x - %d\n", &StringData[sym->Name.Index], sym->VA, sym->Size);
+        OutputDebugStringA(text);
 
         if ( sym->Class != DIC_END && i < Symbols.Count - 1 )
         {
@@ -691,6 +718,7 @@ namespace rekkrunchy
             sym->Size = sym[ 1 ].VA - sym->VA;
         }
       }
+*/
 
       return true;
   }
