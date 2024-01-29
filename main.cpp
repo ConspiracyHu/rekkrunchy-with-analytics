@@ -155,6 +155,7 @@ namespace rekkrunchy
           sSystem->PrintF( "\a - ERROR: couldn't write output file!\n" );
           return 1;
         }
+        sSystem->PrintF( " - unpadded size %d bytes\n", pack.GetActualSize() );
         sSystem->PrintF( " - packed executable %d -> %d bytes\n", inSize, outSize );
         delete[] out;
 
