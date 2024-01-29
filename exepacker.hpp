@@ -104,7 +104,7 @@ namespace rekkrunchy
     void AdjustResourcesR( sU8 *start, sU32 offs, sU32 stringrel, sU32 datarel );
 
   public:
-    sU8 *Pack( sU8 *source, sInt srcSize, sInt &outSize, class DebugInfo *info, PackerCallback cb, KKBlobList *blobs );
+    sU8 *Pack( sU8 *source, sU32 srcSize, sInt &outSize, class DebugInfo *info, PackerCallback cb, KKBlobList *blobs );
     sChar *GetErrorMessage();
     sChar *GetWarningMessages();
     sChar *GetInfoMessages();

@@ -246,7 +246,7 @@ namespace rekkrunchy
   sU32 EXEPacker::SourceOffset2( sU32 RVA )
   {
     sInt i;
-    sS64 relOffs;
+//    sS64 relOffs;
 
     for ( i = 0; i < PH->Sections; i++ )
     {
@@ -656,7 +656,7 @@ namespace rekkrunchy
 
   /****************************************************************************/
 
-  sU8 *EXEPacker::Pack( sU8 *source, sInt srcSize, sInt &outSize, DebugInfo *info, PackerCallback cb, KKBlobList *blobs )
+  sU8 *EXEPacker::Pack( sU8 *source, sU32 srcSize, sInt &outSize, DebugInfo *info, PackerCallback cb, KKBlobList *blobs )
   {
     PESection *outSection;
     sU32 *outDir, imageEnd, dataStart, dataSize, *p, iltOffs, depSize, skip;
@@ -879,7 +879,7 @@ namespace rekkrunchy
     sSetMem( UnImage, 0, dataSize + 8 );
 
     sS32* UnImageSource = new sS32[ dataSize ];
-    for ( int x = 0; x < dataSize; x++ )
+    for ( sU32 x = 0; x < dataSize; x++ )
       UnImageSource[ x ] = -2;
 
     UnImage += 8;
@@ -894,7 +894,7 @@ namespace rekkrunchy
     ImportSize += 4;
     delete[] Imports;
 
-    for ( int x = 0; x < depacker2Size + ImportSize; x++ )
+    for ( sU32 x = 0; x < depacker2Size + ImportSize; x++ )
       UnImageSource[ x ] = -1;
 
 #if !NODEPACK2
@@ -909,7 +909,7 @@ namespace rekkrunchy
       if ( Section[ i ].DataPtr )
       {
         sCopyMem( UnImageVA + Section[ i ].VirtAddr, source + Section[ i ].DataPtr, Section[ i ].Size );
-        for ( int x = 0; x < Section[ i ].Size; x++ )
+        for ( sU32 x = 0; x < Section[ i ].Size; x++ )
           UnImageSource[ depacker2Size + ImportSize + filter.Output.Size - Section[ 0 ].VirtAddr + Section[ i ].VirtAddr + x ] = Section[ i ].DataPtr + x;
       }
 
@@ -931,7 +931,7 @@ namespace rekkrunchy
     CleanupUnImage();
 #if !NODEPACK2
     sSetMem( UnImageVA + PH->CodeStart, 0, codeSize );
-    for ( int x = 0; x < codeSize; x++ )
+    for ( sU32 x = 0; x < codeSize; x++ )
       UnImageSource[ depacker2Size + ImportSize + filter.Output.Size - Section[ 0 ].VirtAddr + PH->CodeStart + x ] = -3;
 #endif
 
@@ -1036,7 +1036,7 @@ namespace rekkrunchy
       info->symbolMap = new short[ srcSize ];
       info->lineMap = new short[ srcSize ];
       info->fileNameMap = new int[ srcSize ];
-      for ( int x = 0; x < srcSize; x++ )
+      for ( sU32 x = 0; x < srcSize; x++ )
       {
         info->packedSizeMap[ x ] = 0;
         info->symbolMap[ x ] = -1;
@@ -1048,7 +1048,7 @@ namespace rekkrunchy
       double overhead = 0;
       double zeroed = 0;
 
-      for ( int x = 0; x < dataSize - skip; x++ )
+      for ( sU32 x = 0; x < dataSize - skip; x++ )
       {
         int idx = UnImageSource[ x ];
         if ( idx >= 0 )
@@ -1085,7 +1085,7 @@ namespace rekkrunchy
           continue;
         }
 
-        for ( int y = 0; y < s.Size; y++ )
+        for ( sU32 y = 0; y < s.Size; y++ )
         {
           if ( info->symbolMap[ s.sourcePos + y ] != -1 )
           {
