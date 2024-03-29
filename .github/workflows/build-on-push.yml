@@ -10,6 +10,7 @@ jobs:
       uses: ilammy/setup-nasm@v1.5.1
       with:
         version: 2.10.07
+        platform: win32
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
     - name: Build Debug|Win32
