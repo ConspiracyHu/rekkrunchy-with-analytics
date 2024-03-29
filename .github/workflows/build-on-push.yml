@@ -8,6 +8,8 @@ jobs:
       uses: actions/checkout@v4
     - name: Setup NASM
       uses: ilammy/setup-nasm@v1.5.1
+      with:
+        version: 2.10.07
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
     - name: Build Debug|Win32
