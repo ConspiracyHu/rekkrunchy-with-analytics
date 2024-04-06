@@ -549,6 +549,7 @@ namespace rekkrunchy
 
     for ( int x = 0; x < sourceSize; x++ )
     {
+#pragma pack(1)
       struct ByteInfo
       {
         unsigned char data;
@@ -557,6 +558,7 @@ namespace rekkrunchy
         short line;
         short file;
       } data;
+#pragma pack()
       data.data = sourceData[ x ];
       data.symbol = symbolMap[ x ];
       data.packed = packedSizeMap[ x ];
