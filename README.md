@@ -13,17 +13,16 @@ Feel free to get in touch at ralph@deadfeed.net
 
 *WARNING:* You need NASM version 2.10.07 for this to compile.
 
--------------------------------------------------------------------------------------------------------------
-
-Changes by BoyC / Conspiracy:
+# Changes by BoyC / Conspiracy:
 
 * added .kkp export for byte exact pack ratio, analyzer tool to be released soon, file format described below	
 * fixed PE header so that the Microsoft exe signing tool actually recognizes produced binaries as executables
 * As the result of the PE header fix, expanded the MZ header with some custom art
 
-KKP file format:
+# KKP file format:
 Used to describe a binary file with all its contents and compression statistics, including symbol info
 
+```
 4 bytes: FOURCC: 'KK64'
 4 bytes: size of described binary in bytes (Ds)
 4 bytes: number of source code files (Cc)
@@ -53,3 +52,4 @@ Ds times: (for each byte of the described binary)
 	double: packed size
 	2 bytes: source code line
 	2 bytes: source code file index
+```
