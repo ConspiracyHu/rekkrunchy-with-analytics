@@ -1007,7 +1007,7 @@ namespace rekkrunchy
         if ( sym->Class != DIC_END && i < info->Symbols.Count - 1 )
         {
           sVERIFY( i != info->Symbols.Count - 1 );
-          if ( !sym->Size )
+          if ( !sym->Size && sym->sourcePos )
             sym->Size = sym[ 1 ].sourcePos - sym->sourcePos;
         }
 
