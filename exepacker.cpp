@@ -968,9 +968,9 @@ namespace rekkrunchy
     // set symbol source offsets and reset symbol packed size
     if ( info && info->Symbols.Array )
     {
-      sU32 base = SourceOffset( info->Symbols[ 0 ].VA - PH->ImageStart *2);
+      sU32 base = SourceOffset( info->Symbols[ 0 ].VA - PH->ImageStart * 2 );
 
-      for (sS32 i = 0; i < info->Symbols.Count; i++)
+      for ( sS32 i = 0; i < info->Symbols.Count; i++ )
       {
         info->Symbols[ i ].sourcePos = info->ImageRvaToVa( info->Symbols[ i ].VA - PH->ImageStart * 2 );
         info->Symbols[ i ].PackedSize = 0;
@@ -997,25 +997,24 @@ namespace rekkrunchy
           }
         }
       }
-    }
 
-    qsort(info->Symbols.Array, info->Symbols.Count, sizeof(DISymbol), [](const void* a, const void* b) { return (int)(((DISymbol*)a)->sourcePos - ((DISymbol*)b)->sourcePos); });
+      qsort( info->Symbols.Array, info->Symbols.Count, sizeof( DISymbol ), []( const void * a, const void * b ) { return (int)( ( (DISymbol *)a )->sourcePos - ( (DISymbol *)b )->sourcePos ); } );
 
-    for (int i = 0; i < info->Symbols.Count; i++)
-    {
-      DISymbol* sym = &info->Symbols[i];
-
-      if (sym->Class != DIC_END && i < info->Symbols.Count - 1)
+      for ( int i = 0; i < info->Symbols.Count; i++ )
       {
-        sVERIFY(i != info->Symbols.Count - 1);
-        if (!sym->Size)
-          sym->Size = sym[1].sourcePos - sym->sourcePos;
+        DISymbol * sym = &info->Symbols[ i ];
+
+        if ( sym->Class != DIC_END && i < info->Symbols.Count - 1 )
+        {
+          sVERIFY( i != info->Symbols.Count - 1 );
+          if ( !sym->Size )
+            sym->Size = sym[ 1 ].sourcePos - sym->sourcePos;
+        }
+
+        char text[ 2048 ]{};
+        sprintf_s( text, "%s: %x - %d\n", *(char **)&( info->Symbols[ i ].Name ), sym->sourcePos, sym->Size );
+        OutputDebugStringA( text );
       }
-
-      char text[2048]{};
-      sprintf_s(text, "%s: %x - %d\n", *(char**)&(info->Symbols[i].Name), sym->sourcePos, sym->Size);
-      OutputDebugStringA(text);
-
     }
 
     unsigned int DEXORSIZE = 0x0;
