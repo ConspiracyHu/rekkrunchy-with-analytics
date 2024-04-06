@@ -9,3 +9,4 @@ Debug
 Release
 *.vcxproj.user
 *.vs/*
+*.args.json
